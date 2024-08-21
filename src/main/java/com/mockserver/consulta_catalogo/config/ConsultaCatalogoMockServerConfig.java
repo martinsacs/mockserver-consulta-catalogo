@@ -39,13 +39,13 @@ public class ConsultaCatalogoMockServerConfig {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
 
-        WireMock.stubFor(WireMock.get(urlPathMatching("/v1/consulta-produto/[a-zA-Z0-9-]+"))
+        WireMock.stubFor(WireMock.get(urlPathMatching("/v1/produtos/[a-zA-Z0-9-]+"))
                 .willReturn(WireMock.aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
                         .withBody(objectMapper.writer().withDefaultPrettyPrinter().writeValueAsString(generateMockObjetoConsultaProduto()))));
 
-        WireMock.stubFor(WireMock.get(urlPathMatching("/v1/consulta-oferta/[a-zA-Z0-9-]+"))
+        WireMock.stubFor(WireMock.get(urlPathMatching("/v1/ofertas/[a-zA-Z0-9-]+"))
                 .willReturn(WireMock.aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
