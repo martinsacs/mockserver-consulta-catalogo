@@ -97,5 +97,5 @@ mvn test
 
 5. Digite a instrução abaixo para executar a aplicação:
 ```
-mvn spring-boot:run -Dspring-boot.run.mainClass=com.mockserver-consulta-catalogo.ConsultaCatalogoApplication
+mvn spring-boot:run -Dspring-boot.run.mainClass=com.mockserver-consulta-catalogo.ConsultaCatalogoMockServerApp
 ```

@@ -2,10 +2,14 @@ package com.mockserver.consulta_catalogo.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mockserver.consulta_catalogo.ConsultaCatalogoApplication;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.WireMock;
+import com.mockserver.consulta_catalogo.ConsultaCatalogoMockServerApp;
 import com.mockserver.consulta_catalogo.MonthlyPremiumAmount;
-import com.mockserver.consulta_catalogo.config.ConsultaCatalogoMockServerConfig;
 import com.mockserver.consulta_catalogo.model.output.ConsultaOfertaOutput;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,15 +25,47 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.mockserver.consulta_catalogo.config.ConsultaCatalogoMockServerConfig.generateMockObjetoConsultaProduto;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
+import static com.mockserver.consulta_catalogo.ConsultaCatalogoMockServerApp.generateMockObjetoConsultaProduto;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ContextConfiguration(classes = {ConsultaCatalogoApplication.class, ConsultaCatalogoMockServerConfig.class})
+@ContextConfiguration(classes = {ConsultaCatalogoMockServerApp.class})
 public class ConsultaCatalogoMockServerTest {
+
+    private static WireMockServer wireMockServer;
 
     @Autowired
     private TestRestTemplate restTemplate;
+
+    @BeforeAll
+    public static void startWireMockServer() throws JsonProcessingException {
+        wireMockServer = new WireMockServer(8081);
+        wireMockServer.start();
+        WireMock.configureFor("localhost", 8081);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+
+        WireMock.stubFor(WireMock.get(urlPathMatching("/v1/produtos/[a-zA-Z0-9-]+"))
+                .willReturn(WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(objectMapper.writer().withDefaultPrettyPrinter().writeValueAsString(generateMockObjetoConsultaProduto()))));
+
+        WireMock.stubFor(WireMock.get(urlPathMatching("/v1/ofertas/[a-zA-Z0-9-]+"))
+                .willReturn(WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(objectMapper.writer().withDefaultPrettyPrinter().writeValueAsString(generateMockObjetoConsultaOferta()))));
+    }
+
+    @AfterAll
+    public static void stopWireMockServer() {
+        if (wireMockServer != null) {
+            wireMockServer.stop();
+        }
+    }
 
     @Test
     public void testMockServerConsultaProdutoResponse() throws JsonProcessingException {

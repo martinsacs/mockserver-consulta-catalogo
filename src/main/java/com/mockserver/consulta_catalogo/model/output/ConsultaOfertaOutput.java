@@ -3,7 +3,6 @@ package com.mockserver.consulta_catalogo.model.output;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mockserver.consulta_catalogo.MonthlyPremiumAmount;
 import lombok.Data;
-
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
